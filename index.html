@@ -10,6 +10,48 @@
     html, body { height: 100%; overflow: hidden; background: #0a0a0a; }
     body { font-family: "Inter", -apple-system, sans-serif; color: #f0f0f0; }
     :root { --bd:rgba(255,255,255,0.07);--td:rgba(255,255,255,0.35);--tf:rgba(255,255,255,0.18);--su:rgba(255,255,255,0.04); }
+
+    /* ── Mini mode overlay ── */
+    #mini-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 200;
+      background: #0a0a0a;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      overflow: hidden;
+      -webkit-app-region: drag;
+    }
+    #mini-overlay.show { display: flex; }
+    #mini-photo {
+      position: absolute; inset: 0;
+      object-fit: cover; object-position: center 10%;
+      width: 100%; height: 100%;
+      -webkit-app-region: drag;
+    }
+    #mini-gradient {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.15) 55%, transparent 100%);
+    }
+    #mini-labels {
+      position: relative; z-index: 1;
+      text-align: center; padding-bottom: 14px;
+      -webkit-app-region: no-drag;
+    }
+    #mini-name { font-family:"Bebas Neue",sans-serif;font-size:20px;letter-spacing:.14em; }
+    #mini-status { font-size:9px;color:rgba(255,255,255,.45);letter-spacing:.16em;margin-top:2px; }
+    #mini-expand {
+      position: absolute; top: 8px; right: 8px; z-index: 2;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 10px; color: rgba(255,255,255,.7);
+      -webkit-app-region: no-drag;
+      transition: background .2s;
+    }
+    #mini-expand:hover { background: rgba(255,255,255,.28); }
+
+    /* ── Setup ── */
     #setup { position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#0a0a0a;padding:24px; }
     .sc { width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px; }
     .sc-logo { font-family:"Bebas Neue",sans-serif;font-size:52px;letter-spacing:.12em;text-align:center;line-height:1; }
@@ -22,6 +64,8 @@
     .sc-hr   { border:none;border-top:1px solid var(--bd); }
     .sc-btn  { background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.85);padding:13px;border-radius:12px;font-family:"Inter",sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:.04em; }
     .sc-btn:hover { background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3); }
+
+    /* ── App ── */
     #app { display:none;height:100vh; }
     .app-wrap { display:flex;height:100%; }
     #sidebar { width:58px;flex-shrink:0;background:#090909;border-right:1px solid var(--bd);display:flex;flex-direction:column;align-items:center;padding:44px 0 18px; }
@@ -35,7 +79,6 @@
     #sb-avatar { width:32px;height:32px;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tf);font-size:11px;flex-shrink:0;transition:border-color .2s; }
     #sb-avatar:hover { border-color:rgba(255,255,255,.45); }
     #sb-avatar img { width:100%;height:100%;object-fit:cover;object-position:center 15%; }
-    #sb-avatar.mini-on { border-color:rgba(255,255,255,.5);box-shadow:0 0 0 2px rgba(255,255,255,.15); }
     #main { flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;padding-top:28px; }
     #sett-panel { display:none;padding:14px 18px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--bd);flex-shrink:0; }
     .sp-lbl { font-size:11px;color:var(--td);margin-bottom:6px;letter-spacing:.04em; }
@@ -93,6 +136,18 @@
 </head>
 <body>
 
+<!-- Mini overlay -->
+<div id="mini-overlay">
+  <img id="mini-photo" src="" alt="Alfred">
+  <div id="mini-gradient"></div>
+  <div id="mini-expand" onclick="toggleMini()" title="Expandir">&#x2197;</div>
+  <div id="mini-labels">
+    <div id="mini-name">ALFRED</div>
+    <div id="mini-status">ACTIVE</div>
+  </div>
+</div>
+
+<!-- Setup -->
 <div id="setup">
   <div class="sc">
     <div class="sc-logo">ALFRED</div>
@@ -116,6 +171,7 @@
   </div>
 </div>
 
+<!-- Main app -->
 <div id="app">
   <div class="app-wrap">
     <div id="sidebar">
@@ -155,13 +211,13 @@
       </div>
       <div id="inp-area">
         <input type="file" id="file-inp" accept="image/*" style="display:none" onchange="handleFile(event)">
-        <div class="inp-btn" onclick="document.getElementById('file-inp').click()" title="Adjuntar imagen">&#128206;</div>
+        <div class="inp-btn" onclick="document.getElementById('file-inp').click()">&#128206;</div>
         <div id="inp-wrap">
           <textarea id="inp-text" placeholder="Escriba un mensaje..." rows="1"
             oninput="autoResize(this)"
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
         </div>
-        <div class="inp-btn" id="inp-mic" onclick="toggleMic()" title="Click para hablar">&#127897;</div>
+        <div class="inp-btn" id="inp-mic" onclick="toggleMic()">&#127897;</div>
         <div class="inp-btn" id="inp-send" onclick="unlockAudio();sendMessage()">&#8593;</div>
       </div>
     </div>
@@ -192,7 +248,8 @@ var S = {
   voiceOut:true, mini:false, showSettings:false,
   attachment:null, audioCtx:null, currentSource:null,
   mediaRecorder:null, audioChunks:[], recognition:null,
-  ttsQueue:[], ttsPlaying:false, ttsCancelled:false
+  ttsQueue:[], ttsPlaying:false, ttsCancelled:false,
+  alfredImgSrc:""
 };
 
 var LS = {
@@ -202,7 +259,6 @@ var LS = {
 };
 
 function cleanForTTS(text){ return text.replace(/[*#`_~]/g,"").replace(/\s{3,}/g," ").trim(); }
-
 function splitToSentences(text){
   var clean=cleanForTTS(text);
   var parts=clean.match(/[^.!?]+[.!?]+/g);
@@ -242,9 +298,20 @@ function startApp(){
 function initApp(){
   S.history=loadHistory();
   processAlfredImage(ALFRED_IMG,function(src){
+    S.alfredImgSrc=src;
     var av=document.getElementById("sb-avatar"); av.innerHTML="";
     var img=document.createElement("img"); img.src=src; img.alt="Alfred"; av.appendChild(img);
+    document.getElementById("mini-photo").src=src;
   });
+  // Listen for Electron mini mode changes
+  if(IS_ELECTRON && window.alfredBridge && window.alfredBridge.onMiniChanged){
+    window.alfredBridge.onMiniChanged(function(val){
+      S.mini=val;
+      document.getElementById("mini-overlay").className=val?"show":"";
+      document.getElementById("app").style.display=val?"none":"block";
+      document.getElementById("mini-status").textContent=getStatusLabel();
+    });
+  }
   var qa=document.getElementById("qa");
   QUICK_ACTIONS.forEach(function(q){
     var b=document.createElement("button"); b.className="qa-btn"; b.textContent=q.l;
@@ -271,6 +338,7 @@ function updateClock(){
   var t=now.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
   var d=now.toLocaleDateString("es-ES",{day:"2-digit",month:"short"}).toUpperCase();
   document.getElementById("sb-clock").textContent=t+" - "+d;
+  document.getElementById("mini-status").textContent=getStatusLabel()+" - "+t;
 }
 function getStatusLabel(){ return S.speaking?"SPEAKING":S.listening?"LISTENING":"ACTIVE"; }
 function updateStatus(){
@@ -365,7 +433,6 @@ async function toggleMic(){
   if(S.listening){stopMic();return;}
   if(IS_ELECTRON){await startWhisperMic();}else{startNativeMic();}
 }
-
 function startNativeMic(){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){showError("SpeechRecognition no disponible. Use Chrome.");return;}
@@ -374,12 +441,10 @@ function startNativeMic(){
   rec.onerror=function(ev){showError("Mic: "+ev.error);stopMic();};
   rec.onend=function(){S.listening=false;updateStatus();updateMicBtn();};
   S.recognition=rec;
-  try{rec.start();S.listening=true;updateStatus();updateMicBtn();}
-  catch(err){showError(err.message);}
+  try{rec.start();S.listening=true;updateStatus();updateMicBtn();}catch(err){showError(err.message);}
 }
-
 async function startWhisperMic(){
-  if(!S.ok){showError("Introduce tu OpenAI API key en ajustes para usar el microfono.");return;}
+  if(!S.ok){showError("Introduce tu OpenAI API key en ajustes.");return;}
   try {
     var stream=await navigator.mediaDevices.getUserMedia({audio:true});
     S.audioChunks=[];
@@ -394,13 +459,11 @@ async function startWhisperMic(){
     S.mediaRecorder.start(); S.listening=true; updateStatus(); updateMicBtn();
   } catch(err){showError("Error de microfono: "+err.message);}
 }
-
 function stopMic(){
   if(S.recognition){try{S.recognition.stop()}catch(e){}S.recognition=null;}
   if(S.mediaRecorder&&S.mediaRecorder.state!=="inactive"){S.mediaRecorder.stop();}
   S.listening=false; updateStatus(); updateMicBtn();
 }
-
 async function transcribeWhisper(blob,mimeType){
   try {
     var ext=mimeType.includes("webm")?"webm":"mp4";
@@ -412,7 +475,6 @@ async function transcribeWhisper(blob,mimeType){
     if(data.text&&data.text.trim()) sendMessage(data.text.trim());
   } catch(e){showError("Error de transcripcion: "+e.message);}
 }
-
 function updateMicBtn(){
   var btn=document.getElementById("inp-mic");
   if(S.listening){btn.classList.add("on","blink");btn.innerHTML="&#9209;";}
@@ -482,21 +544,13 @@ function toggleSettings(){
   else saveKeys();
 }
 
-// Mini mode — uses alfredBridge in Electron, CSS in browser
 function toggleMini(){
   unlockAudio();
   S.mini=!S.mini;
-  var av=document.getElementById("sb-avatar");
-  if(S.mini){
-    av.classList.add("mini-on");
-    if(IS_ELECTRON && window.alfredBridge){
-      window.alfredBridge.setMini(true);
-    }
-  } else {
-    av.classList.remove("mini-on");
-    if(IS_ELECTRON && window.alfredBridge){
-      window.alfredBridge.setMini(false);
-    }
+  document.getElementById("mini-overlay").className=S.mini?"show":"";
+  document.getElementById("app").style.display=S.mini?"none":"block";
+  if(IS_ELECTRON && window.alfredBridge){
+    window.alfredBridge.setMini(S.mini);
   }
 }
 
