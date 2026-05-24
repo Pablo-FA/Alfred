@@ -11,11 +11,10 @@
     body { font-family: "Inter", -apple-system, sans-serif; color: #f0f0f0; }
     :root { --bd:rgba(255,255,255,0.07);--td:rgba(255,255,255,0.35);--tf:rgba(255,255,255,0.18);--su:rgba(255,255,255,0.04); }
 
-    /* ── Mini overlay — fills the small Electron window ── */
+    /* ── Mini overlay ── */
     #mini-overlay {
       display: none;
       position: fixed; inset: 0; z-index: 200;
-      cursor: pointer;
       overflow: hidden;
       -webkit-app-region: drag;
     }
@@ -24,24 +23,24 @@
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: cover; object-position: center 10%;
+      pointer-events: none;
     }
     #mini-gradient {
       position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.1) 55%, transparent 100%);
+      background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.05) 50%, transparent 100%);
       pointer-events: none;
     }
+    /* Click to expand — only the bottom label area, preserves drag on photo */
     #mini-labels {
-      position: absolute; bottom: 12px; left: 0; right: 0;
-      text-align: center; pointer-events: none;
-    }
-    #mini-name { font-family:"Bebas Neue",sans-serif;font-size:18px;letter-spacing:.14em; }
-    #mini-status { font-size:8px;color:rgba(255,255,255,.45);letter-spacing:.16em;margin-top:1px; }
-    /* click anywhere on overlay to expand */
-    #mini-click-zone {
-      position: absolute; inset: 0; z-index: 3;
-      -webkit-app-region: no-drag;
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 44px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       cursor: pointer;
+      -webkit-app-region: no-drag;
     }
+    #mini-name { font-family:"Bebas Neue",sans-serif;font-size:16px;letter-spacing:.14em;line-height:1.1; }
+    #mini-status { font-size:7px;color:rgba(255,255,255,.45);letter-spacing:.16em;margin-top:1px; }
 
     /* ── Setup ── */
     #setup { position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#0a0a0a;padding:24px; }
@@ -127,15 +126,14 @@
 </head>
 <body>
 
-<!-- Mini overlay — fills the small Electron window, click anywhere to expand -->
+<!-- Mini overlay: drag on photo, click on labels to expand -->
 <div id="mini-overlay">
   <img id="mini-photo" src="" alt="Alfred">
   <div id="mini-gradient"></div>
-  <div id="mini-labels">
+  <div id="mini-labels" onclick="toggleMini()">
     <div id="mini-name">ALFRED</div>
     <div id="mini-status">ACTIVE</div>
   </div>
-  <div id="mini-click-zone" onclick="toggleMini()"></div>
 </div>
 
 <!-- Setup -->
