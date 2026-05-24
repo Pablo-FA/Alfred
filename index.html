@@ -359,7 +359,7 @@ async function speakOpenAI(text,key) {
     const res=await fetch(OAI_URL,{
       method:"POST",
       headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},
-      body:JSON.stringify({model:"tts-1",input:text,voice:"onyx",speed:0.92}),
+      body:JSON.stringify({model:"gpt-4o-mini-tts",input:text,voice:"onyx",speed:0.92,instructions:"Habla con acento español de España, castellano puro. Usa el ceceo característico para las letras c y z. Eres un mayordomo refinado, formal y paternal. Voz grave, pausada y elegante."}),
     });
     if(!res.ok){const e=await res.json().catch(()=>({}));showError("Error TTS: "+(e?.error?.message||res.status));S.speaking=false;updateStatus();return;}
     const ab=await res.arrayBuffer();
