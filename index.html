@@ -111,7 +111,7 @@
     <div>
       <div class="sc-lbl">OpenAI API Key <span style="color:rgba(255,255,255,.4)">(opcional — voz natural)</span></div>
       <input class="sc-inp" id="sc-ok" type="password" placeholder="sk-..." autocomplete="off">
-      <div class="sc-hint" style="margin-top:6px">Para la voz "echo". Puedes añadirla después desde ⚙.</div>
+      <div class="sc-hint" style="margin-top:6px">Para la voz "onyx". Puedes añadirla después desde ⚙.</div>
     </div>
     <button class="sc-btn" onclick="startApp()">Iniciar Alfred →</button>
     <div id="sc-err" style="font-size:11px;color:rgba(255,150,130,.8);text-align:center;display:none"></div>
@@ -139,7 +139,7 @@
       <div id="sett-panel">
         <div class="sp-lbl">Anthropic API Key</div>
         <input class="sp-inp" id="sp-ak" type="password" placeholder="sk-ant-..." oninput="saveKeys()" onkeydown="if(event.key==='Enter')toggleSettings()">
-        <div class="sp-lbl">OpenAI API Key (voz "echo")</div>
+        <div class="sp-lbl">OpenAI API Key (voz "onyx")</div>
         <input class="sp-inp" id="sp-ok" type="password" placeholder="sk-..." oninput="saveKeys()" onkeydown="if(event.key==='Enter')toggleSettings()">
         <div class="sp-row">
           <button class="sp-btn" id="sp-test" onclick="testVoice()">▶ Probar voz</button>
@@ -359,7 +359,7 @@ async function speakOpenAI(text,key) {
     const res=await fetch(OAI_URL,{
       method:"POST",
       headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},
-      body:JSON.stringify({model:"tts-1",input:text,voice:"echo",speed:0.92}),
+      body:JSON.stringify({model:"tts-1",input:text,voice:"onyx",speed:0.92}),
     });
     if(!res.ok){const e=await res.json().catch(()=>({}));showError("Error TTS: "+(e?.error?.message||res.status));S.speaking=false;updateStatus();return;}
     const ab=await res.arrayBuffer();
