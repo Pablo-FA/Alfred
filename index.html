@@ -32,8 +32,10 @@
     #sb-title  { flex:1;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;transform:rotate(180deg);font-family:"Bebas Neue",sans-serif;font-size:32px;letter-spacing:.14em;color:#f0f0f0;user-select:none;line-height:1; }
     #sb-status { writing-mode:vertical-lr;transform:rotate(180deg);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--td);margin-bottom:12px;user-select:none; }
     #sb-clock  { writing-mode:vertical-lr;transform:rotate(180deg);font-size:10px;color:var(--tf);letter-spacing:.06em;margin-bottom:16px;font-weight:300; }
-    #sb-avatar { width:32px;height:32px;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tf);font-size:11px;flex-shrink:0; }
+    #sb-avatar { width:32px;height:32px;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tf);font-size:11px;flex-shrink:0;transition:border-color .2s; }
+    #sb-avatar:hover { border-color:rgba(255,255,255,.45); }
     #sb-avatar img { width:100%;height:100%;object-fit:cover;object-position:center 15%; }
+    #sb-avatar.mini-on { border-color:rgba(255,255,255,.5);box-shadow:0 0 0 2px rgba(255,255,255,.15); }
     #main { flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;padding-top:28px; }
     #sett-panel { display:none;padding:14px 18px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--bd);flex-shrink:0; }
     .sp-lbl { font-size:11px;color:var(--td);margin-bottom:6px;letter-spacing:.04em; }
@@ -122,7 +124,7 @@
       <div id="sb-title">ALFRED</div>
       <div id="sb-status">ACTIVE</div>
       <div id="sb-clock">--:--</div>
-      <div id="sb-avatar" title="Minimizar" onclick="toggleMini()">A</div>
+      <div id="sb-avatar" title="Modo mini" onclick="toggleMini()">A</div>
     </div>
     <div id="main">
       <div id="sett-panel">
@@ -199,30 +201,24 @@ var LS = {
   del: function(k){ try{localStorage.removeItem(k)}catch(e){} }
 };
 
-function cleanForTTS(text) {
-  return text.replace(/[*#`_~]/g, "").replace(/\s{3,}/g, " ").trim();
+function cleanForTTS(text){ return text.replace(/[*#`_~]/g,"").replace(/\s{3,}/g," ").trim(); }
+
+function splitToSentences(text){
+  var clean=cleanForTTS(text);
+  var parts=clean.match(/[^.!?]+[.!?]+/g);
+  if(!parts||parts.length===0) return [clean];
+  return parts.map(function(s){return s.trim();}).filter(function(s){return s.length>2;});
 }
 
-function splitToSentences(text) {
-  var clean = cleanForTTS(text);
-  var parts = clean.match(/[^.!?]+[.!?]+/g);
-  if(!parts || parts.length === 0) return [clean];
-  return parts.map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 2; });
-}
-
-function saveHistory() {
-  var t = S.history.slice(-40); S.history=t; LS.set("alf_hist",JSON.stringify(t));
-}
-function loadHistory() {
-  try{ return JSON.parse(LS.get("alf_hist")||"[]") }catch(e){ return [] }
-}
-function clearHistory() {
+function saveHistory(){ var t=S.history.slice(-40); S.history=t; LS.set("alf_hist",JSON.stringify(t)); }
+function loadHistory(){ try{return JSON.parse(LS.get("alf_hist")||"[]")}catch(e){return []} }
+function clearHistory(){
   S.history=[]; LS.del("alf_hist");
   document.getElementById("msgs").innerHTML="";
   addMessage("alfred","Historial borrado, senor. Empezamos desde cero.");
   updateMemBadge();
 }
-function saveKeys() {
+function saveKeys(){
   var ak=document.getElementById("sp-ak").value.trim();
   var ok=document.getElementById("sp-ok").value.trim();
   var ek=document.getElementById("sp-ek").value.trim();
@@ -231,30 +227,28 @@ function saveKeys() {
   if(ek){S.ek=ek;LS.set("alf_ek",ek);}
 }
 
-function startApp() {
+function startApp(){
   var ak=document.getElementById("sc-ak").value.trim();
   var ok=document.getElementById("sc-ok").value.trim();
   var ek=document.getElementById("sc-ek").value.trim();
   var err=document.getElementById("sc-err");
   if(!ak){err.textContent="La API key de Anthropic es necesaria.";err.style.display="block";return;}
   S.ak=ak; S.ok=ok; S.ek=ek;
-  LS.set("alf_ak",ak);
-  if(ok) LS.set("alf_ok",ok);
-  if(ek) LS.set("alf_ek",ek);
+  LS.set("alf_ak",ak); if(ok) LS.set("alf_ok",ok); if(ek) LS.set("alf_ek",ek);
   document.getElementById("setup").style.display="none";
   initApp();
 }
 
-function initApp() {
+function initApp(){
   S.history=loadHistory();
-  processAlfredImage(ALFRED_IMG, function(src){
+  processAlfredImage(ALFRED_IMG,function(src){
     var av=document.getElementById("sb-avatar"); av.innerHTML="";
     var img=document.createElement("img"); img.src=src; img.alt="Alfred"; av.appendChild(img);
   });
   var qa=document.getElementById("qa");
   QUICK_ACTIONS.forEach(function(q){
     var b=document.createElement("button"); b.className="qa-btn"; b.textContent=q.l;
-    b.onclick=function(){ unlockAudio(); sendMessage(q.m); }; qa.appendChild(b);
+    b.onclick=function(){unlockAudio();sendMessage(q.m);}; qa.appendChild(b);
   });
   document.getElementById("sp-ak").value=S.ak;
   document.getElementById("sp-ok").value=S.ok;
@@ -333,7 +327,7 @@ function enqueueTTS(text,key){
   if(!S.voiceOut||!key) return;
   var sentences=splitToSentences(text);
   S.ttsCancelled=false;
-  sentences.forEach(function(s){ S.ttsQueue.push(s); });
+  sentences.forEach(function(s){S.ttsQueue.push(s);});
   if(!S.ttsPlaying) processNextTTS(key);
 }
 
@@ -488,11 +482,22 @@ function toggleSettings(){
   else saveKeys();
 }
 
+// Mini mode — uses alfredBridge in Electron, CSS in browser
 function toggleMini(){
-  if(IS_ELECTRON) return;
   unlockAudio();
   S.mini=!S.mini;
-  document.getElementById("app").style.display=S.mini?"none":"block";
+  var av=document.getElementById("sb-avatar");
+  if(S.mini){
+    av.classList.add("mini-on");
+    if(IS_ELECTRON && window.alfredBridge){
+      window.alfredBridge.setMini(true);
+    }
+  } else {
+    av.classList.remove("mini-on");
+    if(IS_ELECTRON && window.alfredBridge){
+      window.alfredBridge.setMini(false);
+    }
+  }
 }
 
 function processAlfredImage(src,cb){
