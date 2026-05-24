@@ -489,7 +489,9 @@ function toggleSettings(){
 }
 
 function toggleMini(){
-  unlockAudio(); S.mini=!S.mini;
+  if(IS_ELECTRON) return;
+  unlockAudio();
+  S.mini=!S.mini;
   document.getElementById("app").style.display=S.mini?"none":"block";
 }
 
