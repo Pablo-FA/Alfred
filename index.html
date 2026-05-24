@@ -544,10 +544,13 @@ function toggleSettings() {
 
 function toggleMini() {
   unlockAudio(); S.mini=!S.mini;
-  document.getElementById("mini").className=S.mini?"show":"";
-  document.getElementById("app").style.display=S.mini?"none":"block";
-  // Tell Electron to resize window if available
-  if(window.electronAPI) window.electronAPI.setMiniMode(S.mini);
+  if(window.electronAPI) {
+    window.electronAPI.setMiniMode(S.mini);
+  } else {
+    // En navegador, comportamiento anterior
+    document.getElementById(\"mini\").className=S.mini?\"show\":\"\";
+    document.getElementById(\"app\").style.display=S.mini?\"none\":\"block\";
+  }
 }
 
 function processAlfredImage(src,cb) {
