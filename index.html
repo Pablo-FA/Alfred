@@ -11,45 +11,37 @@
     body { font-family: "Inter", -apple-system, sans-serif; color: #f0f0f0; }
     :root { --bd:rgba(255,255,255,0.07);--td:rgba(255,255,255,0.35);--tf:rgba(255,255,255,0.18);--su:rgba(255,255,255,0.04); }
 
-    /* ── Mini mode overlay ── */
+    /* ── Mini overlay — fills the small Electron window ── */
     #mini-overlay {
       display: none;
       position: fixed; inset: 0; z-index: 200;
-      background: #0a0a0a;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
+      cursor: pointer;
       overflow: hidden;
       -webkit-app-region: drag;
     }
-    #mini-overlay.show { display: flex; }
+    #mini-overlay.show { display: block; }
     #mini-photo {
       position: absolute; inset: 0;
-      object-fit: cover; object-position: center 10%;
       width: 100%; height: 100%;
-      -webkit-app-region: drag;
+      object-fit: cover; object-position: center 10%;
     }
     #mini-gradient {
       position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.15) 55%, transparent 100%);
+      background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.1) 55%, transparent 100%);
+      pointer-events: none;
     }
     #mini-labels {
-      position: relative; z-index: 1;
-      text-align: center; padding-bottom: 14px;
-      -webkit-app-region: no-drag;
+      position: absolute; bottom: 12px; left: 0; right: 0;
+      text-align: center; pointer-events: none;
     }
-    #mini-name { font-family:"Bebas Neue",sans-serif;font-size:20px;letter-spacing:.14em; }
-    #mini-status { font-size:9px;color:rgba(255,255,255,.45);letter-spacing:.16em;margin-top:2px; }
-    #mini-expand {
-      position: absolute; top: 8px; right: 8px; z-index: 2;
-      width: 22px; height: 22px; border-radius: 50%;
-      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 10px; color: rgba(255,255,255,.7);
+    #mini-name { font-family:"Bebas Neue",sans-serif;font-size:18px;letter-spacing:.14em; }
+    #mini-status { font-size:8px;color:rgba(255,255,255,.45);letter-spacing:.16em;margin-top:1px; }
+    /* click anywhere on overlay to expand */
+    #mini-click-zone {
+      position: absolute; inset: 0; z-index: 3;
       -webkit-app-region: no-drag;
-      transition: background .2s;
+      cursor: pointer;
     }
-    #mini-expand:hover { background: rgba(255,255,255,.28); }
 
     /* ── Setup ── */
     #setup { position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#0a0a0a;padding:24px; }
@@ -60,7 +52,6 @@
     .sc-inp  { width:100%;background:var(--su);border:1px solid var(--bd);color:#f0f0f0;padding:12px 16px;border-radius:12px;font-family:"Inter",sans-serif;font-size:13px;outline:none;transition:border-color .2s; }
     .sc-inp:focus { border-color:rgba(255,255,255,.25); }
     .sc-inp::placeholder { color:rgba(255,255,255,.2); }
-    .sc-hint { font-size:10px;color:var(--tf);line-height:1.5; }
     .sc-hr   { border:none;border-top:1px solid var(--bd); }
     .sc-btn  { background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.85);padding:13px;border-radius:12px;font-family:"Inter",sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:.04em; }
     .sc-btn:hover { background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3); }
@@ -68,15 +59,15 @@
     /* ── App ── */
     #app { display:none;height:100vh; }
     .app-wrap { display:flex;height:100%; }
-    #sidebar { width:58px;flex-shrink:0;background:#090909;border-right:1px solid var(--bd);display:flex;flex-direction:column;align-items:center;padding:44px 0 18px; }
-    .sb-btn { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.3);font-size:15px;user-select:none;-webkit-user-select:none; }
+    #sidebar { width:58px;flex-shrink:0;background:#090909;border-right:1px solid var(--bd);display:flex;flex-direction:column;align-items:center;padding:44px 0 18px;-webkit-app-region:drag; }
+    .sb-btn { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.3);font-size:15px;user-select:none;-webkit-user-select:none;-webkit-app-region:no-drag; }
     .sb-btn:hover { border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.8); }
     .sb-btn.on { border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);background:rgba(255,255,255,.07); }
     .sb-btn.sm { width:28px;height:28px;font-size:12px; }
-    #sb-title  { flex:1;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;transform:rotate(180deg);font-family:"Bebas Neue",sans-serif;font-size:32px;letter-spacing:.14em;color:#f0f0f0;user-select:none;line-height:1; }
-    #sb-status { writing-mode:vertical-lr;transform:rotate(180deg);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--td);margin-bottom:12px;user-select:none; }
-    #sb-clock  { writing-mode:vertical-lr;transform:rotate(180deg);font-size:10px;color:var(--tf);letter-spacing:.06em;margin-bottom:16px;font-weight:300; }
-    #sb-avatar { width:32px;height:32px;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tf);font-size:11px;flex-shrink:0;transition:border-color .2s; }
+    #sb-title  { flex:1;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;transform:rotate(180deg);font-family:"Bebas Neue",sans-serif;font-size:32px;letter-spacing:.14em;color:#f0f0f0;user-select:none;line-height:1;-webkit-app-region:drag; }
+    #sb-status { writing-mode:vertical-lr;transform:rotate(180deg);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--td);margin-bottom:12px;user-select:none;-webkit-app-region:drag; }
+    #sb-clock  { writing-mode:vertical-lr;transform:rotate(180deg);font-size:10px;color:var(--tf);letter-spacing:.06em;margin-bottom:16px;font-weight:300;-webkit-app-region:drag; }
+    #sb-avatar { width:32px;height:32px;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tf);font-size:11px;flex-shrink:0;transition:border-color .2s;-webkit-app-region:no-drag; }
     #sb-avatar:hover { border-color:rgba(255,255,255,.45); }
     #sb-avatar img { width:100%;height:100%;object-fit:cover;object-position:center 15%; }
     #main { flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;padding-top:28px; }
@@ -136,15 +127,15 @@
 </head>
 <body>
 
-<!-- Mini overlay -->
+<!-- Mini overlay — fills the small Electron window, click anywhere to expand -->
 <div id="mini-overlay">
   <img id="mini-photo" src="" alt="Alfred">
   <div id="mini-gradient"></div>
-  <div id="mini-expand" onclick="toggleMini()" title="Expandir">&#x2197;</div>
   <div id="mini-labels">
     <div id="mini-name">ALFRED</div>
     <div id="mini-status">ACTIVE</div>
   </div>
+  <div id="mini-click-zone" onclick="toggleMini()"></div>
 </div>
 
 <!-- Setup -->
@@ -175,8 +166,8 @@
 <div id="app">
   <div class="app-wrap">
     <div id="sidebar">
-      <div class="sb-btn on" id="sb-voice" title="Silenciar voz" onclick="toggleVoice()">&#128266;</div>
-      <div class="sb-btn sm" id="sb-sett" title="Configuracion" onclick="toggleSettings()" style="margin-top:8px;margin-bottom:16px">&#9881;</div>
+      <div class="sb-btn on" id="sb-voice" onclick="toggleVoice()">&#128266;</div>
+      <div class="sb-btn sm" id="sb-sett" onclick="toggleSettings()" style="margin-top:8px;margin-bottom:16px">&#9881;</div>
       <div id="sb-title">ALFRED</div>
       <div id="sb-status">ACTIVE</div>
       <div id="sb-clock">--:--</div>
@@ -248,8 +239,7 @@ var S = {
   voiceOut:true, mini:false, showSettings:false,
   attachment:null, audioCtx:null, currentSource:null,
   mediaRecorder:null, audioChunks:[], recognition:null,
-  ttsQueue:[], ttsPlaying:false, ttsCancelled:false,
-  alfredImgSrc:""
+  ttsQueue:[], ttsPlaying:false, ttsCancelled:false
 };
 
 var LS = {
@@ -265,7 +255,6 @@ function splitToSentences(text){
   if(!parts||parts.length===0) return [clean];
   return parts.map(function(s){return s.trim();}).filter(function(s){return s.length>2;});
 }
-
 function saveHistory(){ var t=S.history.slice(-40); S.history=t; LS.set("alf_hist",JSON.stringify(t)); }
 function loadHistory(){ try{return JSON.parse(LS.get("alf_hist")||"[]")}catch(e){return []} }
 function clearHistory(){
@@ -282,7 +271,6 @@ function saveKeys(){
   if(ok){S.ok=ok;LS.set("alf_ok",ok);}
   if(ek){S.ek=ek;LS.set("alf_ek",ek);}
 }
-
 function startApp(){
   var ak=document.getElementById("sc-ak").value.trim();
   var ok=document.getElementById("sc-ok").value.trim();
@@ -294,22 +282,18 @@ function startApp(){
   document.getElementById("setup").style.display="none";
   initApp();
 }
-
 function initApp(){
   S.history=loadHistory();
   processAlfredImage(ALFRED_IMG,function(src){
-    S.alfredImgSrc=src;
     var av=document.getElementById("sb-avatar"); av.innerHTML="";
     var img=document.createElement("img"); img.src=src; img.alt="Alfred"; av.appendChild(img);
     document.getElementById("mini-photo").src=src;
   });
-  // Listen for Electron mini mode changes
   if(IS_ELECTRON && window.alfredBridge && window.alfredBridge.onMiniChanged){
     window.alfredBridge.onMiniChanged(function(val){
       S.mini=val;
       document.getElementById("mini-overlay").className=val?"show":"";
       document.getElementById("app").style.display=val?"none":"block";
-      document.getElementById("mini-status").textContent=getStatusLabel();
     });
   }
   var qa=document.getElementById("qa");
@@ -332,7 +316,6 @@ function initApp(){
   document.getElementById("app").style.display="block";
   scrollToBottom();
 }
-
 function updateClock(){
   var now=new Date();
   var t=now.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
@@ -350,7 +333,6 @@ function updateMemBadge(){
   var n=Math.floor(S.history.length/2);
   document.getElementById("mem-badge").textContent=n>0?"Alfred recuerda "+n+" intercambio"+(n===1?"":"s")+" anteriores":"";
 }
-
 function addMessage(role,text,imageUrl,scroll){
   if(scroll===undefined) scroll=true;
   var msgs=document.getElementById("msgs");
@@ -374,7 +356,6 @@ function showTyping(){
 function scrollToBottom(){ var m=document.getElementById("msgs"); m.scrollTop=m.scrollHeight; }
 function showError(msg){ document.getElementById("err-txt").textContent=msg; document.getElementById("err-bar").classList.add("show"); }
 function hideError(){ document.getElementById("err-bar").classList.remove("show"); }
-
 function handleFile(e){
   var file=e.target.files[0]; if(!file) return;
   var reader=new FileReader();
@@ -390,7 +371,6 @@ function clearAttachment(){
   if(S.attachment&&S.attachment.url) URL.revokeObjectURL(S.attachment.url);
   S.attachment=null; document.getElementById("att-bar").classList.remove("show");
 }
-
 function enqueueTTS(text,key){
   if(!S.voiceOut||!key) return;
   var sentences=splitToSentences(text);
@@ -398,17 +378,12 @@ function enqueueTTS(text,key){
   sentences.forEach(function(s){S.ttsQueue.push(s);});
   if(!S.ttsPlaying) processNextTTS(key);
 }
-
 async function processNextTTS(key){
   if(S.ttsCancelled||S.ttsQueue.length===0){S.ttsPlaying=false;S.speaking=false;updateStatus();return;}
   S.ttsPlaying=true; S.speaking=true; updateStatus();
   var sentence=S.ttsQueue.shift();
   try {
-    var res=await fetch(ELEVEN_BASE,{
-      method:"POST",
-      headers:{"xi-api-key":key,"Content-Type":"application/json","Accept":"audio/mpeg"},
-      body:JSON.stringify({text:sentence,model_id:"eleven_multilingual_v2",voice_settings:{stability:0.5,similarity_boost:0.85,style:0.3,use_speaker_boost:true}})
-    });
+    var res=await fetch(ELEVEN_BASE,{method:"POST",headers:{"xi-api-key":key,"Content-Type":"application/json","Accept":"audio/mpeg"},body:JSON.stringify({text:sentence,model_id:"eleven_multilingual_v2",voice_settings:{stability:0.5,similarity_boost:0.85,style:0.3,use_speaker_boost:true}})});
     if(!res.ok||S.ttsCancelled){S.ttsQueue=[];S.ttsPlaying=false;S.speaking=false;updateStatus();return;}
     var ab=await res.arrayBuffer();
     if(S.ttsCancelled){S.ttsPlaying=false;S.speaking=false;updateStatus();return;}
@@ -416,26 +391,22 @@ async function processNextTTS(key){
     var ctx=S.audioCtx; if(ctx.state==="suspended") await ctx.resume();
     var buf=await ctx.decodeAudioData(ab);
     if(S.ttsCancelled){S.ttsPlaying=false;S.speaking=false;updateStatus();return;}
-    var src=ctx.createBufferSource(); src.buffer=buf; src.connect(ctx.destination);
-    S.currentSource=src;
-    src.onended=function(){S.currentSource=null;processNextTTS(key);};
-    src.start(0);
+    var src=ctx.createBufferSource(); src.buffer=buf; src.connect(ctx.destination); S.currentSource=src;
+    src.onended=function(){S.currentSource=null;processNextTTS(key);}; src.start(0);
   } catch(e){S.ttsQueue=[];S.ttsPlaying=false;S.speaking=false;updateStatus();}
 }
-
 function stopSpeaking(){
   S.ttsCancelled=true; S.ttsQueue=[]; S.ttsPlaying=false;
   if(S.currentSource){try{S.currentSource.stop()}catch(e){}S.currentSource=null;}
   S.speaking=false; updateStatus();
 }
-
 async function toggleMic(){
   if(S.listening){stopMic();return;}
   if(IS_ELECTRON){await startWhisperMic();}else{startNativeMic();}
 }
 function startNativeMic(){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){showError("SpeechRecognition no disponible. Use Chrome.");return;}
+  if(!SR){showError("SpeechRecognition no disponible.");return;}
   var rec=new SR(); rec.lang="es-ES"; rec.interimResults=false; rec.continuous=false;
   rec.onresult=function(ev){if(ev.results.length){var txt=ev.results[0][0].transcript;stopMic();sendMessage(txt);}};
   rec.onerror=function(ev){showError("Mic: "+ev.error);stopMic();};
@@ -473,14 +444,13 @@ async function transcribeWhisper(blob,mimeType){
     if(!res.ok){var e=await res.json().catch(function(){return{};});showError("Error Whisper: "+(e.error&&e.error.message?e.error.message:res.status));return;}
     var data=await res.json();
     if(data.text&&data.text.trim()) sendMessage(data.text.trim());
-  } catch(e){showError("Error de transcripcion: "+e.message);}
+  } catch(e){showError("Error: "+e.message);}
 }
 function updateMicBtn(){
   var btn=document.getElementById("inp-mic");
   if(S.listening){btn.classList.add("on","blink");btn.innerHTML="&#9209;";}
   else{btn.classList.remove("on","blink");btn.innerHTML="&#127897;";}
 }
-
 async function sendMessage(text){
   unlockAudio();
   var ta=document.getElementById("inp-text");
@@ -488,20 +458,15 @@ async function sendMessage(text){
   if((!msg&&!S.attachment)||S.loading) return;
   ta.value=""; autoResize(ta); hideError();
   var content;
-  if(S.attachment){
-    content=[{type:"image",source:{type:"base64",media_type:S.attachment.type,data:S.attachment.b64}},{type:"text",text:msg||"Que ves en esta imagen?"}];
-  } else {content=msg;}
+  if(S.attachment){content=[{type:"image",source:{type:"base64",media_type:S.attachment.type,data:S.attachment.b64}},{type:"text",text:msg||"Que ves en esta imagen?"}];}
+  else{content=msg;}
   var imgUrl=S.attachment?S.attachment.url:null;
   clearAttachment(); addMessage("user",msg||"(imagen adjunta)",imgUrl); showTyping();
   S.loading=true; stopSpeaking();
   S.history.push({role:"user",content:content});
   var ekSnap=S.ek; var voiceSnap=S.voiceOut;
   try {
-    var res=await fetch(ANT_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json","x-api-key":S.ak,"anthropic-version":"2023-06-01"},
-      body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1024,system:SYSTEM,messages:S.history})
-    });
+    var res=await fetch(ANT_URL,{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.ak,"anthropic-version":"2023-06-01"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1024,system:SYSTEM,messages:S.history})});
     var data=await res.json();
     if(!res.ok) throw new Error(data.error&&data.error.message?data.error.message:res.status);
     var reply=(data.content||[]).map(function(b){return b.text||"";}).join("")||"Error tecnico, senor.";
@@ -514,12 +479,10 @@ async function sendMessage(text){
   }
   S.loading=false;
 }
-
 function unlockAudio(){
   if(!S.audioCtx) S.audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   if(S.audioCtx.state==="suspended") S.audioCtx.resume();
 }
-
 async function testVoice(){
   if(!S.ek){document.getElementById("sett-err").textContent="Introduce tu ElevenLabs API key primero.";document.getElementById("sett-err").style.display="block";return;}
   document.getElementById("sett-err").style.display="none";
@@ -528,14 +491,12 @@ async function testVoice(){
   enqueueTTS("A su disposicion, senor.",S.ek);
   setTimeout(function(){btn.disabled=false;btn.textContent="Probar voz";},3000);
 }
-
 function toggleVoice(){
   unlockAudio(); S.voiceOut=!S.voiceOut; if(!S.voiceOut) stopSpeaking();
   var btn=document.getElementById("sb-voice");
   btn.innerHTML=S.voiceOut?"&#128266;":"&#128263;";
   btn.className="sb-btn"+(S.voiceOut?" on":"");
 }
-
 function toggleSettings(){
   S.showSettings=!S.showSettings;
   document.getElementById("sett-panel").style.display=S.showSettings?"block":"none";
@@ -543,7 +504,6 @@ function toggleSettings(){
   if(S.showSettings){document.getElementById("sp-ak").value=S.ak;document.getElementById("sp-ok").value=S.ok;document.getElementById("sp-ek").value=S.ek;}
   else saveKeys();
 }
-
 function toggleMini(){
   unlockAudio();
   S.mini=!S.mini;
@@ -553,7 +513,6 @@ function toggleMini(){
     window.alfredBridge.setMini(S.mini);
   }
 }
-
 function processAlfredImage(src,cb){
   var img=new Image();
   img.onload=function(){
@@ -568,9 +527,7 @@ function processAlfredImage(src,cb){
   };
   img.src=src;
 }
-
 function autoResize(el){el.style.height="auto";el.style.height=Math.min(el.scrollHeight,80)+"px";}
-
 (function(){
   var ak=LS.get("alf_ak"); var ok=LS.get("alf_ok")||""; var ek=LS.get("alf_ek")||"";
   if(ak){S.ak=ak;S.ok=ok;S.ek=ek;document.getElementById("setup").style.display="none";initApp();}
