@@ -359,7 +359,7 @@ async function speakOpenAI(text,key) {
     const res=await fetch(OAI_URL,{
       method:"POST",
       headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},
-      instructions:"Speak with a Castilian Spanish accent from Spain. Use the distinctive 'th' sound (like in English 'think') for the letters c (before e/i) and z — this is called 'distinción', not 'ceceo'. Never use seseo. You are a refined, formal and paternal butler. Deep, measured and elegant voice. Examples: 'disposición' sounds like 'disposithión', 'gracias' sounds like 'grathias', 'señor' stays 'señor'.",
+      body:JSON.stringify({model:"gpt-4o-mini-tts",input:text,voice:"onyx",speed:0.95,instructions:"Castilian Spanish accent from Spain. Distincion: pronounce c and z as th-sound. Never seseo. Refined, paternal butler. Deep and measured voice."}),
     });
     if(!res.ok){const e=await res.json().catch(()=>({}));showError("Error TTS: "+(e?.error?.message||res.status));S.speaking=false;updateStatus();return;}
     const ab=await res.arrayBuffer();
