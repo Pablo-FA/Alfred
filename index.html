@@ -11,12 +11,15 @@
     body { font-family: "Inter", -apple-system, sans-serif; color: #f0f0f0; }
     :root { --bd:rgba(255,255,255,0.07);--td:rgba(255,255,255,0.35);--tf:rgba(255,255,255,0.18);--su:rgba(255,255,255,0.04); }
 
-    /* ── Mini overlay ── */
+    /* ── Mini overlay ──
+       Top 28px = drag strip (move window)
+       Rest     = click to expand
+    ── */
     #mini-overlay {
       display: none;
       position: fixed; inset: 0; z-index: 200;
       overflow: hidden;
-      -webkit-app-region: drag;
+      background: #0a0a0a;
     }
     #mini-overlay.show { display: block; }
     #mini-photo {
@@ -27,19 +30,26 @@
     }
     #mini-gradient {
       position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.05) 50%, transparent 100%);
+      background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.05) 55%, transparent 100%);
       pointer-events: none;
     }
-    /* Click to expand — only the bottom label area, preserves drag on photo */
-    #mini-labels {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      height: 44px;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      cursor: pointer;
-      -webkit-app-region: no-drag;
+    /* Drag strip — top bar, draggable */
+    #mini-drag {
+      position: absolute; top: 0; left: 0; right: 0; height: 28px;
+      -webkit-app-region: drag;
+      z-index: 2;
     }
-    #mini-name { font-family:"Bebas Neue",sans-serif;font-size:16px;letter-spacing:.14em;line-height:1.1; }
+    /* Click zone — rest of window, expands on click */
+    #mini-click {
+      position: absolute; top: 28px; left: 0; right: 0; bottom: 0;
+      cursor: pointer;
+      z-index: 2;
+      -webkit-app-region: no-drag;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      padding-bottom: 10px;
+    }
+    #mini-name { font-family:"Bebas Neue",sans-serif;font-size:15px;letter-spacing:.14em;line-height:1.1; }
     #mini-status { font-size:7px;color:rgba(255,255,255,.45);letter-spacing:.16em;margin-top:1px; }
 
     /* ── Setup ── */
@@ -126,11 +136,12 @@
 </head>
 <body>
 
-<!-- Mini overlay: drag on photo, click on labels to expand -->
+<!-- Mini overlay -->
 <div id="mini-overlay">
   <img id="mini-photo" src="" alt="Alfred">
   <div id="mini-gradient"></div>
-  <div id="mini-labels" onclick="toggleMini()">
+  <div id="mini-drag"></div>
+  <div id="mini-click" onclick="toggleMini()">
     <div id="mini-name">ALFRED</div>
     <div id="mini-status">ACTIVE</div>
   </div>
@@ -246,12 +257,11 @@ var LS = {
   del: function(k){ try{localStorage.removeItem(k)}catch(e){} }
 };
 
-function cleanForTTS(text){ return text.replace(/[*#`_~]/g,"").replace(/\s{3,}/g," ").trim(); }
+function cleanForTTS(t){ return t.replace(/[*#`_~]/g,"").replace(/\s{3,}/g," ").trim(); }
 function splitToSentences(text){
-  var clean=cleanForTTS(text);
-  var parts=clean.match(/[^.!?]+[.!?]+/g);
-  if(!parts||parts.length===0) return [clean];
-  return parts.map(function(s){return s.trim();}).filter(function(s){return s.length>2;});
+  var c=cleanForTTS(text), p=c.match(/[^.!?]+[.!?]+/g);
+  if(!p||!p.length) return [c];
+  return p.map(function(s){return s.trim();}).filter(function(s){return s.length>2;});
 }
 function saveHistory(){ var t=S.history.slice(-40); S.history=t; LS.set("alf_hist",JSON.stringify(t)); }
 function loadHistory(){ try{return JSON.parse(LS.get("alf_hist")||"[]")}catch(e){return []} }
@@ -371,13 +381,12 @@ function clearAttachment(){
 }
 function enqueueTTS(text,key){
   if(!S.voiceOut||!key) return;
-  var sentences=splitToSentences(text);
   S.ttsCancelled=false;
-  sentences.forEach(function(s){S.ttsQueue.push(s);});
+  splitToSentences(text).forEach(function(s){S.ttsQueue.push(s);});
   if(!S.ttsPlaying) processNextTTS(key);
 }
 async function processNextTTS(key){
-  if(S.ttsCancelled||S.ttsQueue.length===0){S.ttsPlaying=false;S.speaking=false;updateStatus();return;}
+  if(S.ttsCancelled||!S.ttsQueue.length){S.ttsPlaying=false;S.speaking=false;updateStatus();return;}
   S.ttsPlaying=true; S.speaking=true; updateStatus();
   var sentence=S.ttsQueue.shift();
   try {
@@ -439,7 +448,7 @@ async function transcribeWhisper(blob,mimeType){
     var fd=new FormData();
     fd.append("file",blob,"audio."+ext); fd.append("model","whisper-1"); fd.append("language","es");
     var res=await fetch(WHISPER_URL,{method:"POST",headers:{"Authorization":"Bearer "+S.ok},body:fd});
-    if(!res.ok){var e=await res.json().catch(function(){return{};});showError("Error Whisper: "+(e.error&&e.error.message?e.error.message:res.status));return;}
+    if(!res.ok){var e=await res.json().catch(function(){return{};});showError("Whisper: "+(e.error&&e.error.message?e.error.message:res.status));return;}
     var data=await res.json();
     if(data.text&&data.text.trim()) sendMessage(data.text.trim());
   } catch(e){showError("Error: "+e.message);}
@@ -507,9 +516,7 @@ function toggleMini(){
   S.mini=!S.mini;
   document.getElementById("mini-overlay").className=S.mini?"show":"";
   document.getElementById("app").style.display=S.mini?"none":"block";
-  if(IS_ELECTRON && window.alfredBridge){
-    window.alfredBridge.setMini(S.mini);
-  }
+  if(IS_ELECTRON && window.alfredBridge) window.alfredBridge.setMini(S.mini);
 }
 function processAlfredImage(src,cb){
   var img=new Image();
