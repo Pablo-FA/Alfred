@@ -113,7 +113,15 @@
       display:flex;flex-direction:column;
       overflow:hidden;
       transition: width .25s ease;
+      
     }
+    #tp-resizer {
+  width: 4px; flex-shrink:0;
+  cursor: col-resize;
+  background: transparent;
+  transition: background .15s;
+}
+#tp-resizer:hover, #tp-resizer.dragging { background: rgba(255,255,255,.15); }
     #task-panel.open { width:260px; }
     #tp-header { padding:14px 14px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--bd); }
     #tp-title { font-family:"Bebas Neue",sans-serif;font-size:16px;letter-spacing:.1em;color:rgba(255,255,255,.8); }
@@ -251,6 +259,7 @@
       </div>
 
       <!-- Task panel -->
+      <div id="tp-resizer"></div>
       <div id="task-panel">
         <div id="tp-header">
           <div id="tp-title">MIS TAREAS</div>
@@ -743,6 +752,28 @@ document.addEventListener('paste', function(e) {
     }
   }
 });
+  (function(){
+  var resizer = document.getElementById('tp-resizer');
+  var panel   = document.getElementById('task-panel');
+  var dragging = false;
+  resizer.addEventListener('mousedown', function(e){
+    dragging = true;
+    resizer.classList.add('dragging');
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function(e){
+    if(!dragging) return;
+    var wrap  = document.getElementById('main-wrap');
+    var right = wrap.getBoundingClientRect().right;
+    var w     = Math.max(180, Math.min(480, right - e.clientX));
+    panel.style.width = w + 'px';
+  });
+  document.addEventListener('mouseup', function(){
+    if(!dragging) return;
+    dragging = false;
+    resizer.classList.remove('dragging');
+  });
+})();
 
 (function(){
   var ak=LS.get("alf_ak"); var ok=LS.get("alf_ok")||""; var ek=LS.get("alf_ek")||"";
