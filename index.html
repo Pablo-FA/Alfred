@@ -533,6 +533,26 @@ function processAlfredImage(src,cb){
   img.src=src;
 }
 function autoResize(el){el.style.height="auto";el.style.height=Math.min(el.scrollHeight,80)+"px";}
+  document.addEventListener('paste', function(e) {
+  if(S.mini || document.getElementById('app').style.display === 'none') return;
+  var items = (e.clipboardData || e.originalEvent.clipboardData).items;
+  for(var i=0; i<items.length; i++) {
+    if(items[i].type.indexOf('image') !== -1) {
+      var file = items[i].getAsFile();
+      var reader = new FileReader();
+      reader.onload = function() {
+        var b64 = reader.result.split(',')[1];
+        var url = URL.createObjectURL(file);
+        S.attachment = {file:file, b64:b64, url:url, type:file.type||'image/png'};
+        document.getElementById('att-thumb').src = url;
+        document.getElementById('att-name').textContent = 'Imagen del portapapeles';
+        document.getElementById('att-bar').classList.add('show');
+      };
+      reader.readAsDataURL(file);
+      break;
+    }
+  }
+});
 (function(){
   var ak=LS.get("alf_ak"); var ok=LS.get("alf_ok")||""; var ek=LS.get("alf_ek")||"";
   if(ak){S.ak=ak;S.ok=ok;S.ek=ek;document.getElementById("setup").style.display="none";initApp();}
