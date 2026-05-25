@@ -442,7 +442,9 @@ function hideBucketInput(){
 }
 function toggleTaskPanel(){
   S.showTasks=!S.showTasks;
-  document.getElementById("task-panel").className=S.showTasks?"open":"";
+  var panel=document.getElementById("task-panel");
+  panel.className=S.showTasks?"open":"";
+  if(!S.showTasks) panel.style.width="";
   document.getElementById("sb-tasks").className="sb-btn sm"+(S.showTasks?" on":"");
 }
 
