@@ -158,6 +158,7 @@
     .tm-btn.primary { border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.9); }
     .tm-deps-list { display:flex;flex-wrap:wrap;gap:5px;min-height:16px; }
     .tm-dep-tag { background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:12px;padding:2px 8px;font-size:10px;color:var(--td); }
+    #top-drag { position:fixed;top:0;left:58px;right:0;height:28px;-webkit-app-region:drag;z-index:5; }
     @keyframes alf-in  { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
     @keyframes alf-dot { 0%,100%{opacity:.2;transform:translateY(0)} 50%{opacity:.9;transform:translateY(-3px)} }
     @keyframes alf-blk { 0%,100%{opacity:.5} 50%{opacity:1} }
@@ -211,6 +212,7 @@
 </div>
 
 <div id="app">
+  <div id="top-drag"></div>
   <div class="app-wrap">
     <div id="sidebar">
       <div class="sb-btn on" id="sb-voice" onclick="toggleVoice()">&#128266;</div>
